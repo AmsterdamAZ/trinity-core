@@ -1,0 +1,102 @@
+# Trinity — Model-Role Registry
+# =============================================================================
+# SINGLE SOURCE OF TRUTH: logical role -> concrete model (FDS §4.2).
+# Concrete model IDs live HERE and nowhere else; code references ROLES ONLY.
+# A model swap is one edit to this file — then RE-RUN THE EVAL SUITE before it
+# ships (swaps are eval-gated: FDS §4.2 / Roadmap Story 7.1).
+#
+# Agents (Trinity, Dash, Scout, Hunter, Ace, Sentry, Pulse) are a SEPARATE layer:
+# each agent definition references one of these roles. They are NOT listed here.
+# `used_by` below is an informational readability aid, not the authoritative
+# agent->role binding (that lives in the agent definitions, added Sprint 4+).
+#
+# Resolver: trinity/model_registry.py  (target repo path: trinity/config/model-registry.yaml)
+# =============================================================================
+
+meta:
+  version: 1
+  owner: system architect
+  hermes_core: "trinity-core (Hermes fork v0.16.0)"
+  swap_policy: eval-gated          # no model change ships without clearing deterministic + judge graders
+  notes: >
+    `provider` values map onto Hermes runtime_provider resolution: `anthropic`
+    = native Anthropic API mode; `openai_compatible` = LiteLLM / OpenAI-compatible
+    gateway (used by the pending Flash candidate). `candidates` with status:pending
+    are documented intended swaps that are NOT active yet.
+
+roles:
+
+  # ---- Tier 3 — frontier (correctness-critical) -----------------------------
+  orchestrator:
+    provider: anthropic
+    model: claude-sonnet-4-6
+    escalation: claude-opus-4-8        # reserved for the genuinely hard subset; NOT the default
+    tier: 3
+    residency: anthropic
+    used_by: [trinity]
+    notes: >
+      Hard orchestration reasoning. Default Sonnet; escalate to Opus only for
+      multi-step decomposition. Routine routing must not reach this tier.
+
+  coder:
+    provider: anthropic
+    model: claude-sonnet-4-6
+    escalation: claude-opus-4-8        # reserved
+    tier: 3
+    residency: anthropic
+    used_by: [dash]                    # Builder agent (Sprint 4)
+    notes: Code / PR work; correctness-critical, so frontier tier.
+
+  # ---- Tier 1 — router / trivial --------------------------------------------
+  router:
+    provider: anthropic
+    model: claude-haiku-4-5
+    tier: 1
+    residency: anthropic
+    used_by: [trinity]                 # intent classification, timers, canned replies
+    candidates:
+      - id: local-slm
+        provider: openai_compatible    # local OpenAI-compatible endpoint
+        model: qwen-3.6-35b-a3b         # Qwen 3.6-35B-A3B on a dedicated GPU box
+        residency: local
+        status: pending                # eval-gated AND hardware-gated (FDS §4.1)
+        notes: $0/token + full data isolation once local inference hardware exists.
+    notes: >
+      Short prompts only. Decomposition/delegation escalates above Tier 1 — never
+      trusted to the router, since a cheap model can misclassify a hard task as easy.
+
+  # ---- Tier 2 — latency-critical opening sentence ---------------------------
+  fast-first-sentence:
+    provider: anthropic
+    model: claude-haiku-4-5            # Haiku-DIRECT (no gateway hop)
+    tier: 2
+    residency: anthropic
+    used_by: [trinity]                 # the opening spoken sentence (Voice I/O §4.5)
+    notes: >
+      Stays Haiku-direct until Flash-via-gateway time-to-first-token is measured
+      against the ~1.0-1.5s first-audible-word budget. A gateway hop adds latency
+      and variance; this latency-critical role does not move until the number holds.
+
+  # ---- Tier 2 — bulk / cheap ------------------------------------------------
+  bulk:
+    provider: anthropic                # PROVISIONAL — see decision note
+    model: claude-haiku-4-5
+    tier: 2
+    residency: anthropic
+    used_by: [scout, hunter, ace, sentry, pulse]   # specialists; built Sprint 4+
+    candidates:
+      - id: deepseek-flash-gateway
+        provider: openai_compatible    # LiteLLM / OpenAI-compatible gateway
+        model: deepseek-v4-flash
+        gateway: "fireworks|together|openrouter"   # pick one when wiring
+        residency: western
+        status: pending                # Story 7.2: wire gateway + normalize `reasoning_content`; eval-gated
+        notes: >
+          INTENDED Tier-2 target per FDS §4.1. Not active until the gateway endpoint
+          is wired and DeepSeek's `reasoning_content` field is normalized in the
+          client wrapper (FDS §4.2), then cleared through the eval suite.
+    notes: >
+      DECISION (Story 0.3): bulk runs PROVISIONALLY on Haiku-direct so the registry
+      is fully functional today without the gateway. To activate Flash, promote the
+      deepseek-flash-gateway candidate to provider/model here once Story 7.2 wires it
+      and evals pass. Flip to gateway = one edit.
