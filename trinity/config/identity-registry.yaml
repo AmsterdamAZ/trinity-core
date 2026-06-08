@@ -1,0 +1,75 @@
+# Trinity Identity Registry — single source of truth for names, voices, personas, wake word.
+# Companion to model-registry.yaml. The MODEL registry answers "role -> model";
+# THIS answers "what each agent is CALLED, SOUNDS like, and WAKES on"
+# (identity-naming-layer-spec §3).
+#
+# CONTRACT (spec §1-§2):
+#   - Route on stable agent_id/role. display_name is presentation-only.
+#   - A rename = edit display_name. A voice change = edit voice_id. Neither is a code change.
+#   - The persona name lives ONLY in the {{display_name}} slot; voice-defining traits stay
+#     name-agnostic (spec §4) so a rename changes what an agent is CALLED, not how it SOUNDS.
+
+system:
+  display_name: "Trinity"           # product/system name; free text, user-renamable
+  wake_word:
+    mode: typed                     # typed | spoken  (spec §6; typed is the Phase-1 default)
+    phrase: "trinity"               # used by the typed path; read by Story 1.1, never hardcoded
+    enrollment_ref: null            # set to a recording-set id when mode = spoken
+
+# agent_id = stable routing key (NEVER renamed). `role` aligns with model-registry roles
+# where natural (orchestrator -> orchestrator, builder -> coder); specialist roles are
+# functional labels whose MODEL tiers are assigned when each agent is actually built
+# (Sprints 4-6) — identity role and model-registry role are separate namespaces.
+#
+# `enabled` reflects roster restraint: only live agents are wired. Identity entries for
+# planned agents are reserved here as CONFIG ONLY — naming an agent is not building it.
+agents:
+  - agent_id: orchestrator          # the hub; shares the system identity
+    role: orchestrator
+    display_name: "Trinity"
+    voice_id: "kokoro:default"      # placeholder — real voice ids surface from the TTS
+                                    # registry in Story 2.1 and via the installer dropdown (§5/§7)
+    persona_ref: persona/orchestrator.md
+    enabled: true
+
+  - agent_id: builder               # Sprint 4 (Dash)
+    role: coder
+    display_name: "Dash"
+    voice_id: null
+    persona_ref: persona/builder.md
+    enabled: false
+
+  - agent_id: lead_gen              # Sprint 5 (Scout)
+    role: lead-gen
+    display_name: "Scout"
+    voice_id: null
+    persona_ref: persona/lead_gen.md
+    enabled: false
+
+  - agent_id: marketing             # Sprint 5 (Hunter)
+    role: marketing
+    display_name: "Hunter"
+    voice_id: null
+    persona_ref: persona/marketing.md
+    enabled: false
+
+  - agent_id: sales                 # Sprint 5 (Ace)
+    role: sales
+    display_name: "Ace"
+    voice_id: null
+    persona_ref: persona/sales.md
+    enabled: false
+
+  - agent_id: devops                # Sprint 6 (Sentry)
+    role: devops
+    display_name: "Sentry"
+    voice_id: null
+    persona_ref: persona/devops.md
+    enabled: false
+
+  - agent_id: support               # Sprint 6 (Pulse)
+    role: support
+    display_name: "Pulse"
+    voice_id: null
+    persona_ref: persona/support.md
+    enabled: false
