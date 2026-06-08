@@ -1,0 +1,31 @@
+# Trinity Voice Registry (Voice I/O spec §5) — provider + tuning for the voice I/O stack.
+# Companion to model-registry.yaml / identity-registry.yaml. One edit swaps a provider;
+# nothing in code changes. Every swap re-runs the voice evals before it ships (spec §7).
+#
+# NOTE: the wake *phrase* and *mode* are NOT set here — they are owned by the identity
+# registry (identity-naming-layer-spec §3). This file owns only the wake ENGINE + tuning.
+# Set `provider: stub` on any block to run the pipeline headless (no mic / no models).
+
+voice:
+  wake_word:
+    provider: openwakeword     # openwakeword | stub
+    threshold: 0.5             # detection confidence; tune for false-accept/reject balance
+
+  capture:
+    provider: mic              # mic | stub
+    sample_rate: 16000         # 16 kHz mono is what the wake/VAD/STT models expect
+    frame_ms: 30               # frame size fed to wake word + VAD
+
+  vad:
+    provider: silero           # silero | stub
+    end_of_speech_ms: 700      # trailing silence that closes the utterance (AC: "tuned window")
+                               # spec example used 250 ms; 250 is aggressive and clips speech —
+                               # start ~700 and tune down with real audio.
+
+  stt:
+    provider: stub             # stub now; faster-whisper lands in Story 1.2
+    model: small
+
+  tts:
+    provider: kokoro           # wired in Story 2.1 (output path); unused in 1.1
+    voice: <default>

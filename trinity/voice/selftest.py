@@ -18,6 +18,7 @@ from .config import ProviderConfig, registry
 from .segmenter import StreamingSentenceSegmenter, collecting_sink
 from .state import StateMachine, VoiceState
 from .vad import StubVAD
+from .wer import aggregate_wer, run_command_set, word_error_rate
 
 
 def test_state_machine() -> None:
@@ -144,6 +145,60 @@ def test_segmenter_edges() -> None:
     print("PASS  segmenter: single unterminated sentence + empty stream edges")
 
 
+# --- Story 1.2: WER grader + command-set harness ------------------------------
+
+def test_wer_grader() -> None:
+    assert word_error_rate("how are my apps doing", "how are my apps doing").wer == 0.0
+    sub = word_error_rate("how are my apps doing", "how are my apps going")
+    assert (sub.substitutions, sub.deletions, sub.insertions) == (1, 0, 0) and sub.wer == 0.2, sub
+    dele = word_error_rate("deploy the latest build", "deploy latest build")
+    assert (dele.substitutions, dele.deletions, dele.insertions) == (0, 1, 0) and dele.wer == 0.25, dele
+    ins = word_error_rate("any errors", "any new errors")
+    assert (ins.substitutions, ins.deletions, ins.insertions) == (0, 0, 1) and ins.wer == 0.5, ins
+    empty = word_error_rate("hello world", "")
+    assert empty.deletions == 2 and empty.wer == 1.0, empty
+    print("PASS  WER: substitution/deletion/insertion counts and rates correct")
+
+
+def test_wer_normalization() -> None:
+    # case + punctuation + contraction apostrophe must not register as errors
+    r = word_error_rate("What's my briefing?", "whats my briefing")
+    assert r.wer == 0.0, r
+    print("PASS  WER: case, punctuation, and contractions normalized away")
+
+
+def test_aggregate_wer() -> None:
+    rep = aggregate_wer([("a b c", "a b c"), ("d e", "d x")])
+    assert rep["total_errors"] == 1 and rep["total_ref_words"] == 5, rep
+    assert rep["wer"] == 0.2, rep   # micro-average: 1 error / 5 ref words
+    print("PASS  WER: micro-averaged aggregate (total errors / total ref words)")
+
+
+def test_command_set_harness() -> None:
+    import os
+    import tempfile
+    import yaml as _yaml
+    from pathlib import Path as _Path
+
+    fixture = {"commands": [
+        {"id": "a", "reference": "how are my apps doing", "audio": "a.wav"},
+        {"id": "b", "reference": "any errors", "audio": "b.wav"},
+    ]}
+    tmp = _Path(tempfile.mkdtemp())
+    fp = tmp / "cs.yaml"
+    fp.write_text(_yaml.safe_dump(fixture), encoding="utf-8")
+
+    class FakeFileSTT:
+        def transcribe_file(self, path: str) -> str:
+            return {"a.wav": "how are my apps going", "b.wav": "any errors"}[os.path.basename(path)]
+
+    rep = run_command_set(FakeFileSTT(), audio_dir=str(tmp), path=fp)
+    assert rep["total_errors"] == 1 and rep["total_ref_words"] == 7, rep   # a:1 sub/5, b:0/2
+    assert abs(rep["wer"] - 1 / 7) < 1e-9, rep
+    assert rep["skipped"] == [] and len(rep["scored"]) == 2, rep
+    print("PASS  WER harness: scores a provider over the command set, micro-averages")
+
+
 if __name__ == "__main__":
     test_state_machine()
     test_capture_window()
@@ -154,4 +209,8 @@ if __name__ == "__main__":
     test_segmenter_release_on_next_start()
     test_segmenter_maxchars()
     test_segmenter_edges()
-    print("\nAll Story 1.1 + 1.3 self-tests passed.")
+    test_wer_grader()
+    test_wer_normalization()
+    test_aggregate_wer()
+    test_command_set_harness()
+    print("\nAll Story 1.1 + 1.3 + 1.2 self-tests passed.")

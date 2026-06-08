@@ -1,0 +1,40 @@
+# Fixed command set for STT WER scoring (Story 1.2; Voice I/O §7).
+# Each entry: a stable id, the reference transcript (ground truth), and `audio` —
+# the recorded WAV filename. Leave `audio: null` until recorded; the WER harness
+# skips entries with no audio. Record each line once (your voice or phone), drop the
+# WAVs in a folder, and run:  python -m trinity.voice.wer --audio-dir <folder>
+#
+# Keep references in the operator's real command vocabulary so WER reflects the
+# phrases Trinity must actually get right.
+
+commands:
+  - id: briefing
+    reference: "what's my morning briefing"
+    audio: null
+  - id: app_health
+    reference: "how are my apps doing"
+    audio: null
+  - id: verbella_revenue
+    reference: "what's verbella's revenue this month"
+    audio: null
+  - id: meta_spend
+    reference: "show me today's ad spend on meta"
+    audio: null
+  - id: recent_errors
+    reference: "any errors in the last hour"
+    audio: null
+  - id: quantum_status
+    reference: "what's the status of quantum capture"
+    audio: null
+  - id: scout_leads
+    reference: "how many new leads did scout find today"
+    audio: null
+  - id: stripe_mrr
+    reference: "what's our stripe mrr right now"
+    audio: null
+  - id: github_activity
+    reference: "summarize the latest github activity"
+    audio: null
+  - id: rabbit_health
+    reference: "is rabbit protocol healthy"
+    audio: null
