@@ -1,0 +1,173 @@
+[
+  {
+    "task_id": "briefing-basic",
+    "category": "regression",
+    "role": "orchestrator",
+    "model": "claude-sonnet-4-6",
+    "response": "Active users are holding steady at around forty-two thousand this month, which is up about eight percent from last quarter.\n\nRevenue is trending upward with monthly recurring revenue crossing the two-point-three million dollar mark, though growth has slowed slightly compared to the same period last year.\n\nThe primary risk on our radar is a competitor who launched a comparable feature set last week at a twenty percent lower price point, which could put pressure on our mid-tier retention over the next ninety days.",
+    "latency_ms": 4735.524800023995,
+    "ttf_ms": 1864.7699000430293,
+    "turns": 1,
+    "tokens": null,
+    "chars": 517,
+    "graders": [
+      {
+        "name": "accuracy",
+        "passed": true,
+        "detail": "ok",
+        "soft": false
+      },
+      {
+        "name": "turns",
+        "passed": true,
+        "detail": "1 <= 1",
+        "soft": false
+      },
+      {
+        "name": "latency",
+        "passed": true,
+        "detail": "4736ms <= 12000ms",
+        "soft": true
+      },
+      {
+        "name": "judge",
+        "passed": true,
+        "detail": "score=1.00 (>= 0.7); The response delivers exactly three plain-prose sentences covering active users (42k, up 8%), revenue trend (MRR crossing $2.3M, growth slowing), and one risk (competitor undercutting price), all internally consistent and natural when read aloud with no lists or markdown.",
+        "soft": false
+      }
+    ],
+    "passed": true
+  },
+  {
+    "task_id": "route-intent-timer",
+    "category": "regression",
+    "role": "router",
+    "model": "claude-haiku-4-5",
+    "response": "timer",
+    "latency_ms": 1023.7300000153482,
+    "ttf_ms": 939.5284000202082,
+    "turns": 1,
+    "tokens": null,
+    "chars": 5,
+    "graders": [
+      {
+        "name": "accuracy",
+        "passed": true,
+        "detail": "ok",
+        "soft": false
+      },
+      {
+        "name": "turns",
+        "passed": true,
+        "detail": "1 <= 1",
+        "soft": false
+      },
+      {
+        "name": "latency",
+        "passed": true,
+        "detail": "1024ms <= 6000ms",
+        "soft": true
+      }
+    ],
+    "passed": true
+  },
+  {
+    "task_id": "factual-direct",
+    "category": "regression",
+    "role": "router",
+    "model": "claude-haiku-4-5",
+    "response": "Paris",
+    "latency_ms": 6817.017900000792,
+    "ttf_ms": 6721.43200004939,
+    "turns": 1,
+    "tokens": null,
+    "chars": 5,
+    "graders": [
+      {
+        "name": "accuracy",
+        "passed": true,
+        "detail": "ok",
+        "soft": false
+      },
+      {
+        "name": "turns",
+        "passed": true,
+        "detail": "1 <= 1",
+        "soft": false
+      },
+      {
+        "name": "latency",
+        "passed": false,
+        "detail": "6817ms <= 6000ms",
+        "soft": true
+      }
+    ],
+    "passed": true
+  },
+  {
+    "task_id": "grounding-no-invented-figures",
+    "category": "failure_mode",
+    "role": "orchestrator",
+    "model": "claude-sonnet-4-6",
+    "response": "I don't have access to any revenue data, financial records, or business information for your organization.\n\nTo summarize your Q2 revenue, I'd need you to provide the figures or point me to a file/database I can access. For example, you could:\n\n- **Paste the data** directly into the chat\n- **Share a file path** to a CSV, Excel, or report I can read\n- **Point me to a database** or system where the data lives\n\nOnce you share the data, I'm happy to summarize and analyze it for you.",
+    "latency_ms": 4516.168100002687,
+    "ttf_ms": 2104.5488999807276,
+    "turns": 1,
+    "tokens": null,
+    "chars": 482,
+    "graders": [
+      {
+        "name": "accuracy",
+        "passed": true,
+        "detail": "ok",
+        "soft": false
+      },
+      {
+        "name": "turns",
+        "passed": true,
+        "detail": "1 <= 2",
+        "soft": false
+      },
+      {
+        "name": "latency",
+        "passed": true,
+        "detail": "4516ms <= 12000ms",
+        "soft": true
+      }
+    ],
+    "passed": true
+  },
+  {
+    "task_id": "turn-budget-simple",
+    "category": "failure_mode",
+    "role": "orchestrator",
+    "model": "claude-sonnet-4-6",
+    "response": "An orchestrator agent coordinates and delegates tasks to other specialized agents or tools, managing the overall workflow to accomplish a complex goal.",
+    "latency_ms": 1933.0753000103869,
+    "ttf_ms": 1371.6235000174493,
+    "turns": 1,
+    "tokens": null,
+    "chars": 151,
+    "graders": [
+      {
+        "name": "accuracy",
+        "passed": true,
+        "detail": "ok",
+        "soft": false
+      },
+      {
+        "name": "turns",
+        "passed": true,
+        "detail": "1 <= 2",
+        "soft": false
+      },
+      {
+        "name": "latency",
+        "passed": true,
+        "detail": "1933ms <= 12000ms",
+        "soft": true
+      }
+    ],
+    "passed": true
+  }
+]

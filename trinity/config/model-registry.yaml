@@ -100,3 +100,14 @@ roles:
       is fully functional today without the gateway. To activate Flash, promote the
       deepseek-flash-gateway candidate to provider/model here once Story 7.2 wires it
       and evals pass. Flip to gateway = one edit.
+
+  # ---- Eval infrastructure --------------------------------------------------
+  judge:
+    provider: anthropic
+    model: claude-opus-4-8
+    tier: 3
+    residency: anthropic
+    used_by: [eval-harness]
+    notes: >
+      LLM-as-judge grader (Story 0.3). Highest-quality model for grading; called
+      only on judge-enabled tasks, so volume is low. Swap = one edit, like any role.
